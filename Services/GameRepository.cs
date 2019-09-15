@@ -16,7 +16,7 @@ namespace Hoard.Services
         private static string getOwnedGames = "GetOwnedGames";
         private static string version = "v0001";
 
-        private static string key = "047AAD57A5ACAB494EA451D629A79184";
+        private static string key = "";
         
         private static string steamApiUri = $"http://api.steampowered.com/IPlayerService/{getOwnedGames}/{version}/?key={key}&include_appinfo={true}&format=json";
         
