@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -8,53 +9,50 @@ namespace Hoard.Services
 {
     public class GameRepository
     {
-
         private static HttpClient client = new HttpClient();
+        private Regex tags = new Regex("<a[^>]*class=\\\"app_tag\\\"[^>]*>([^<]*)</a>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        // TODO: Move these to environment storage
-        private static string steamStoreUri = "https://store.steampowered.com/app/";
-        private static string getOwnedGames = "GetOwnedGames";
-        private static string version = "v0001";
+        private static string steamStoreUri = Environment.GetEnvironmentVariable("STEAM_STORE_URI");
+        private static string getOwnedGamesUri = Environment.GetEnvironmentVariable("STEAM_API_URI_GET_OWNED_GAMES");
+        private static string key = Environment.GetEnvironmentVariable("STEAM_STORE_URI");
 
-        private static string key = "";
-        
-        private static string steamApiUri = $"http://api.steampowered.com/IPlayerService/{getOwnedGames}/{version}/?key={key}&include_appinfo={true}&format=json";
-        
-        async Task<List<Game>> GetGamesFor(string steamId)
+        public async Task<List<Game>> GetGamesFor(string steamId)
         {
-            HttpResponseMessage response = await client.GetAsync(steamApiUri + $"&steamid={steamId}");
-
-            SteamGamesResponseContainer returnValue = await response.Content.ReadAsAsync<SteamGamesResponseContainer>();
-            string str = await response.Content.ReadAsStringAsync();
+            HttpResponseMessage gamesHttpResponse = await client.GetAsync(getOwnedGamesUri + $"&steamid={steamId}" + $"&key={key}");
+            SteamGamesResponseContainer gamesResponse = await gamesHttpResponse.Content.ReadAsAsync<SteamGamesResponseContainer>();
 
             // TODO: place holder to limit to 10 for now. Need to move to an async operation
             int i = 0;
-            foreach (Game game in returnValue.Response.Games)
+            foreach (Game game in gamesResponse.Response.Games)
             {
                 i++;
                 HttpResponseMessage gameResponse = await client.GetAsync(steamStoreUri + game.AppId);
                 string gamesPage = await gameResponse.Content.ReadAsStringAsync();
 
-                Regex re = new Regex("<a[^>]*class=\\\"app_tag\\\"[^>]*>([^<]*)</a>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-                MatchCollection matches = re.Matches(gamesPage);
-                if (matches.Count > 0)
-                {
-                    foreach (Match match in matches)
-                    {
-                        string tag = match.Groups[1].Value.Trim();
-                        if (!string.IsNullOrEmpty(tag))
-                        {
-                            game.Tags.Add(tag);
-                        }
-                    }
-                }
+                SetTags(game, gamesPage);
 
                 if (i > 10) break;
             }
 
-            return returnValue.Response.Games;
+            return gamesResponse.Response.Games;
         }
-    }
 
+        private void SetTags(Game game, string pageHtml)
+        {
+            MatchCollection matches = tags.Matches(pageHtml);
+
+            if (matches.Count > 0)
+            {
+                foreach (Match match in matches)
+                {
+                    string tag = match.Groups[1].Value.Trim();
+                    if (!string.IsNullOrEmpty(tag))
+                    {
+                        game.Tags.Add(tag);
+                    }
+                }
+            }
+        }
+
+    }
 }

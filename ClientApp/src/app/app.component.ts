@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 export class AppComponent {
   title: "Hoard";
   public games: {};
+  steamId: number; 
 
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
     http.get<any>(baseUrl + 'api/Games/All').subscribe(result => {

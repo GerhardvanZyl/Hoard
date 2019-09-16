@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hoard.Model;
+using Hoard.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hoard.Controllers
@@ -10,9 +12,13 @@ namespace Hoard.Controllers
     public class GamesController : Controller
     {
         [HttpGet("[action]")]
-        public IEnumerable<string> All()
+        public async Task<IEnumerable<Game>> All(string steamId)
         {
-            return new string[] {"a", "b"};
+            GameRepository repo = new GameRepository();
+            List<Game> games = await repo.GetGamesFor(steamId);
+
+
+            return games;
         }
     }
 }
