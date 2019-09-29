@@ -1,3 +1,28 @@
 <h1>Hoard</h1>
-<input type="text" value="{{steamId}}">
+<input type="text" [(ngModel)]="steamId">
+<button (click)="fetchGames()" class="button">Get games list</button>
+
+<h2>Games</h2>
+<hr />
+<div class="grid-container">
+  <div class="grid-x">
+    <ul>
+      <li *ngFor="let game of games">
+        <div class="cell">
+          <h5>
+            {{game.name}}
+          </h5>
+          <span *ngFor="let tag of game.tags; let i = index">
+            <span *ngIf="i<5" class="tag">{{tag}}</span> &nbsp;
+          </span>
+        </div>
+      </li>
+    </ul>
+    <div class="cell"></div>
+
+  </div>
+
+</div>
+
+
 <router-outlet></router-outlet>

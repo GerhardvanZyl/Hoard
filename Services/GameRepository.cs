@@ -12,13 +12,14 @@ namespace Hoard.Services
         private static HttpClient client = new HttpClient();
         private Regex tags = new Regex("<a[^>]*class=\\\"app_tag\\\"[^>]*>([^<]*)</a>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        private static string steamStoreUri = Environment.GetEnvironmentVariable("STEAM_STORE_URI");
+        private static string steamStoreUri = Environment.GetEnvironmentVariable("STEAM_STORE_GAMES_URI");
         private static string getOwnedGamesUri = Environment.GetEnvironmentVariable("STEAM_API_URI_GET_OWNED_GAMES");
-        private static string key = Environment.GetEnvironmentVariable("STEAM_STORE_URI");
+        private static string key = Environment.GetEnvironmentVariable("STEAM_API_KEY");
 
         public async Task<List<Game>> GetGamesFor(string steamId)
         {
             HttpResponseMessage gamesHttpResponse = await client.GetAsync(getOwnedGamesUri + $"&steamid={steamId}" + $"&key={key}");
+            string temp = await gamesHttpResponse.Content.ReadAsStringAsync();
             SteamGamesResponseContainer gamesResponse = await gamesHttpResponse.Content.ReadAsAsync<SteamGamesResponseContainer>();
 
             // TODO: place holder to limit to 10 for now. Need to move to an async operation
@@ -26,8 +27,8 @@ namespace Hoard.Services
             foreach (Game game in gamesResponse.Response.Games)
             {
                 i++;
-                HttpResponseMessage gameResponse = await client.GetAsync(steamStoreUri + game.AppId);
-                string gamesPage = await gameResponse.Content.ReadAsStringAsync();
+                HttpResponseMessage gamePageResponse = await client.GetAsync(steamStoreUri + game.AppId);
+                string gamesPage = await gamePageResponse.Content.ReadAsStringAsync();
 
                 SetTags(game, gamesPage);
 
