@@ -21,7 +21,7 @@
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "STEAM_API_KEY": "047AAD57A5ACAB494EA451D629A79184",
+        "STEAM_API_KEY": "",
         "STEAM_API_URI_GET_OWNED_GAMES": "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?include_appinfo=true&format=json",
         "STEAM_STORE_GAMES_URI": "https://store.steampowered.com/app/"
       }
